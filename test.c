@@ -2,8 +2,9 @@
 #include <stdlib.h>
 #include <time.h>
 
-#define MAX_N 100
-#define MAX_K 50
+#define MAX_N 6
+#define MAX_K 3
+#define MAX_T 2
 
 // Fonction pour calculer le poids (nombre de bits à 1) d'un vecteur
 int weight(int *vec, int len) {
@@ -85,6 +86,11 @@ int invert_matrix(int mat[MAX_K][MAX_K], int inv[MAX_K][MAX_K], int k) {
             }
         }
 
+        // Si le pivot est toujours 0, la matrice n'est pas inversible
+        if (aug[i][i] == 0) {
+            return 0; // Inversion échouée
+        }
+
         // Élimination
         for (int j = 0; j < k; j++) {
             if (i != j && aug[j][i] == 1) {
@@ -158,6 +164,8 @@ int decode(int G[MAX_K][MAX_N], int y[MAX_N], int k, int n, int t) {
 
                 return 1;
             }
+        } else {
+            printf("Matrice M non inversible. Retenter...\n");
         }
     }
 }
@@ -165,18 +173,14 @@ int decode(int G[MAX_K][MAX_N], int y[MAX_N], int k, int n, int t) {
 int main() {
     srand(time(NULL));
 
-    int k = 2;
-    int n = 5;
-    int t = 1;
-
     // Génération automatique de la matrice G et du vecteur y
     int G[MAX_K][MAX_N];
     int y[MAX_N];
     
     // Génération de la matrice G aléatoire
     printf("Matrice generatrice G:\n");
-    for (int i = 0; i < k; i++) {
-        for (int j = 0; j < n; j++) {
+    for (int i = 0; i < MAX_K; i++) {
+        for (int j = 0; j < MAX_N; j++) {
             G[i][j] = rand() % 2;
             printf("%d ", G[i][j]);
         }
@@ -185,37 +189,37 @@ int main() {
 
     // Génération du vecteur x aléatoire
     int x[MAX_K];
-    for (int i = 0; i < k; i++) {
+    for (int i = 0; i < MAX_K; i++) {
         x[i] = rand() % 2;
     }
 
     // Calcul de y = xG + e
-    for (int i = 0; i < n; i++) {
+    for (int i = 0; i < MAX_N; i++) {
         y[i] = 0;
-        for (int j = 0; j < k; j++) {
+        for (int j = 0; j < MAX_K; j++) {
             y[i] ^= (x[j] * G[j][i]);
         }
     }
 
     // Ajout d'erreurs de poids t
-    for (int i = 0; i < t; i++) {
+    for (int i = 0; i < MAX_T; i++) {
         int pos;
         do {
-            pos = rand() % n;
+            pos = rand() % MAX_N;
         } while (y[pos] == 1); // S'assurer de ne pas ajouter une erreur déjà présente
         y[pos] ^= 1;
     }
 
     // Affichage du vecteur y
     printf("Vecteur y:\n");
-    print_vector(y, n);
+    print_vector(y, MAX_N);
 
     // Calcul du temps d'exécution
     clock_t start, end;
     double cpu_time_used;
     
     start = clock();
-    decode(G, y, k, n, t);
+    decode(G, y, MAX_K, MAX_N, MAX_T);
     end = clock();
     
     cpu_time_used = ((double) (end - start)) / CLOCKS_PER_SEC;
